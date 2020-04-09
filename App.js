@@ -1,22 +1,23 @@
 import React from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {createStore} from 'redux';
+import {Provider} from 'react-redux';
+import rootReducer from './reducers';
 import {Home, Chat} from './components';
 import {Router, Stack, Scene} from "react-native-router-flux";
+
+const store = createStore(rootReducer);
 
 export default class App extends React.Component {
     render() {
         return (
-            // <React.Fragment>
-            //     <Chat/>
-            //     <Home/>
-            // </React.Fragment>
-
-            <Router>
-                <Stack key="mainStack">
-                    <Scene key="home" component={Home} title="Home"/>
-                    <Scene key="chat" component={Chat} title="Chat"/>
-                </Stack>
-            </Router>
+            <Provider store={store}>
+                <Router>
+                    <Stack key="mainStack">
+                        <Scene key="home" component={Home} title="Home"/>
+                        <Scene key="chat" component={Chat} title="Chat"/>
+                    </Stack>
+                </Router>
+            </Provider>
         );
     }
 }

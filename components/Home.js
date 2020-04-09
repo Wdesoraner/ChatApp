@@ -1,7 +1,10 @@
 import React from 'react';
+import {connect} from 'react-redux';
 import {Text, TextInput, View, StyleSheet, Button} from 'react-native';
 import {Actions} from 'react-native-router-flux'
+import {chatActions} from "../actions";
 
+@connect()
 export class Home extends React.Component {
 
     state = {
@@ -16,8 +19,10 @@ export class Home extends React.Component {
     }
 
     handleChatPress = e => {
+        const {dispatch} = this.props
         const {user, room} = this.state;
-        Actions.chat({user, title: `Salon "${room}"`})
+        dispatch(chatActions.join(user, room))
+        Actions.chat({title: `Salon "${room}"`})
     }
 
     render() {
@@ -62,8 +67,8 @@ const styles = StyleSheet.create({
         color: 'blue'
     },
     label: {
-      marginTop:16,
-      textAlign:'left',
+        marginTop: 16,
+        textAlign: 'left',
     },
     input: {
         backgroundColor: 'white',
