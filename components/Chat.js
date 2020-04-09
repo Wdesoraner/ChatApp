@@ -1,104 +1,69 @@
 import React from 'react';
-import {connect} from 'react-redux'
-import {View, StyleSheet, FlatList, TextInput, Button} from 'react-native';
+import {connect} from 'react-redux';
+import {Text, View, StyleSheet, FlatList, TextInput, Button} from 'react-native';
 import {MessageItem} from './MessageItem';
+import {chatActions} from '../actions';
 
-@connect(({chat: {user, room, messages}}) => ({user, room, messages}))
+@connect(({chat: {user, room, messages, error}}) => ({user, room, messages, error}))
 export class Chat extends React.Component {
+
+    state = {
+        content: ''
+    }
+
+
+    getData() {
+        const {messages} = this.props;
+        return messages.map((message, i) => ({
+            ...message, key: `message_${i}`
+        }));
+    }
+
+    handleContentChange = content => {
+        this.setState({content});
+    }
+
+    handleSendPress = e => {
+        const {dispatch} = this.props;
+        const {content} = this.state;
+        if(content !== '')
+        {
+            dispatch(chatActions.sendMessage({content}));
+        }
+        this.setState({content: ''});
+    }
+
+
+
     render() {
-        const {user, room} = this.props;
-        const messages = [
-            {
-                content: "Han, Maské et Maître Grims",
-                author: 'Maské',
-                created_at: new Date()
-            },
-            {
-                content: "Hou Yeah",
-                author: 'Maitre Grims',
-                created_at: new Date()
-            },
-            {
-                content: "De retour parce qu'on revient et ainsi de suite",
-                author: 'Maské',
-                created_at: new Date()
-            },
-            {
-                content: "Ho Ho",
-                author: 'Maitre Grims',
-                created_at: new Date()
-            },
-            {
-                content: "Y'a trop de trucs qui m'énervent sur Terre",
-                author: 'Maské',
-                created_at: new Date()
-            },
-            {
-                content: "Les chômeurs sans travail, les orphelins sans père",
-                author: 'Maské',
-                created_at: new Date()
-            },
-            {
-                content: "Plus rien ne tourne rond et personne veut l'admettre",
-                author: 'Maské',
-                created_at: new Date()
-            },
-            {
-                content: "Et ça m'vénère, dis leur Maître",
-                author: 'Maské',
-                created_at: new Date()
-            },
-            {
-                content: "Ça m'vénère ! Quand je marche en chaussettes dans la salle de bains",
-                author: 'Maitre Grims',
-                created_at: new Date()
-            },
-            {
-                content: "Et qu'y a de l'eau partout j'fais ça tout les matins",
-                author: 'Maitre Grims',
-                created_at: new Date()
-            },
-            {
-                content: "Je tire mal mon rideau qu'y a des motifs indiens",
-                author: 'Maitre Grims',
-                created_at: new Date()
-            },
-            {
-                content: "Oh ça m'vénère, oui ça m'vénère !",
-                author: 'Maitre Grims',
-                created_at: new Date()
-            },
-            {
-                content: "Okay D’accord, j’te comprends mais j’pensais pas à ça",
-                author: 'Maské',
-                created_at: new Date()
-            },
-            {
-                content: "Plus aux problèmes de la jeunesse tu vois les trucs comme ça",
-                author: 'Maské',
-                created_at: new Date()
-            },
-        ]
+        const {user, error} = this.props;
+        const {content} = this.state;
 
         return (
             <View style={styles.container}>
-
-                <FlatList style={styles.list}
-                          data={messages.map((message, i) => ({...message, key: `message_${i}`}))}
-                          renderItem={({item: message}) =>
-                              <MessageItem user={user} message={message} created_at={message.created_at}/>
-                          }
+                {error &&
+                <Text>Error: {error.message}</Text>
+                }
+                <FlatList
+                    style={styles.list}
+                    data={this.getData()}
+                    renderItem={({item: message}) =>
+                        <MessageItem user={user} message={message} created_at={message.created_at}/>
+                    }
                 />
 
                 <View style={styles.composerContainer}>
                     <TextInput
-
                         style={styles.composerInput}
                         placeholder="Saisir un message"
+                        value={content}
+                        onChangeText={this.handleContentChange}
                     />
 
                     <Button
                         title="Envoyer"
+                        onPress={this.handleSendPress}
+                        disabled={content ===''}
                     />
                 </View>
 
