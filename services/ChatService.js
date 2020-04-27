@@ -1,24 +1,56 @@
 import PouchDB from 'pouchdb-react-native';
 
-let db, currentUser, currentRoom = null;
+const REMOTE_DB = 'http://gathor.org:5984/';
+
+let db, currentUser, currentRoom, sync = null;
 
 export const chatService = {
     join,
-    sendMessage
+    sendMessage,
+    listMessages
 }
 
-function join(user, room){
+function join(user, room, onSync, onFail) {
+    if (/^_/.test(room)) {
+        onFail('Le nom du salon ne peut pas commencer par "_"');
+    }
     currentUser = user || 'Anonymous';
-    currentRoom = room || 'général';
+    currentRoom = room.toLowerCase() || 'general';
     db = new PouchDB(currentRoom);
 
+    sync = db.sync(`${REMOTE_DB}/${currentRoom}`, {
+        live: true,
+        retry: true,
+        continuous: true
+    });
+    sync.on('change', handleChange(onSync));
+    sync.on('error', handleError(onFail));
+    return listMessages();
+}
+
+function listMessages() {
     return db.allDocs({
         include_docs: true,
-    }).then(response =>
-        response.rows
+    }).then(response => {
+        return response.rows
             .map(row => row.doc)
-            .sort((a,b) => a.created_at > b.created_at)
-    );
+            .sort((a, b) => a.created_at > b.created_at)
+    });
+}
+
+function handleChange(callback) {
+    return change => {
+        console.log('change', change);
+        listMessages()
+            .then(messages => callback(messages))
+            .catch(console.error);
+    }
+}
+
+function handleError(callabck) {
+    return error => {
+        callabck(error);
+    }
 }
 
 function sendMessage(message) {

@@ -1,3 +1,5 @@
+import {Actions} from "react-native-router-flux";
+
 const initState = {
     user: "Maské",
     room: null,
@@ -5,11 +7,11 @@ const initState = {
     error: undefined
 }
 
-export const chat = function(state = initState, action) {
+export const chat = function (state = initState, action) {
 
-    switch(action.type) {
+    switch (action.type) {
         case 'JOIN_REQUEST':
-            return{
+            return {
                 ...state,
                 user: action.user,
                 room: action.room,
@@ -29,7 +31,13 @@ export const chat = function(state = initState, action) {
                     action.message
                 ]
             }
+        case 'SYNC_SUCCESS':
+            return {
+                ...state,
+                messages: action.messages
+            };
         case 'FAILURE':
+        case 'SYNC_FAILURE':
             return {
                 ...state,
                 error: action.error

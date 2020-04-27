@@ -11,6 +11,7 @@ export class Chat extends React.Component {
         content: ''
     }
 
+    listElement = React.createRef();
 
     getData() {
         const {messages} = this.props;
@@ -26,13 +27,11 @@ export class Chat extends React.Component {
     handleSendPress = e => {
         const {dispatch} = this.props;
         const {content} = this.state;
-        if(content !== '')
-        {
+        if (content !== '') {
             dispatch(chatActions.sendMessage({content}));
         }
         this.setState({content: ''});
     }
-
 
 
     render() {
@@ -50,7 +49,9 @@ export class Chat extends React.Component {
                     renderItem={({item: message}) =>
                         <MessageItem user={user} message={message} created_at={message.created_at}/>
                     }
-                />
+                    ref= {ref => this.listElement = ref}
+                    onContentSizeChange={() => this.listElement.scrollToEnd({animated:true})}
+                    onLayout={() => this.listElement.scrollToEnd({animated:true})}                      />
 
                 <View style={styles.composerContainer}>
                     <TextInput
@@ -63,7 +64,7 @@ export class Chat extends React.Component {
                     <Button
                         title="Envoyer"
                         onPress={this.handleSendPress}
-                        disabled={content ===''}
+                        disabled={content === ''}
                     />
                 </View>
 
